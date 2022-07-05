@@ -25,8 +25,10 @@ class Model():
         Y = np.dot(X, W)                   # Determine layer exit
         
         if (self.sanger):
-            Z = np.dot(W, np.transpose(Y*diag))                     # Predict X using Sanger
-            dW = (np.transpose(X) - Z) * Y               # Weight corrections using Sanger
+            ydiag = np.multiply(Y, diag)                             # MxM matrix
+            Z = np.dot(ydiag, np.transpose(W))                       # Predict X using Sanger
+            dW = np.transpose((np.multiply(Z, -1) + X))               # Weight corrections using Sanger
+            dW = np.multiply(dW, Y)
         else:
             Z = np.dot(Y, W.transpose())                            # Predict X using Oja
             dW = np.outer(X - Z, Y)                                 # Weight corrections using Oja
@@ -85,5 +87,7 @@ class Model():
     
     # Last layer orthogonal weights
     def orthogonalWeights(self):
-        o = np.sum(np.abs(np.dot(self.W[len(self.W) - 1].transpose(), self.W[len(self.W) - 1]) - np.identity(self.W[len(self.W) - 1].shape[1])))/2
+        w = self.W[len(self.W) - 1]
+        M = np.shape(w)[1]
+        o = np.sum(np.abs(np.dot(np.transpose(w), w) - np.identity(M)))/2
         return o
