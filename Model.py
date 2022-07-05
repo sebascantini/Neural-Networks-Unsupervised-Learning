@@ -22,7 +22,7 @@ class Model():
     def activate(self, X, W):
         M = np.shape(W)[1]                                          # Layer exit size
         diag = np.triu(np.ones((M, M)))                             # Diagonal matrix of ones
-        Y = np.dot(np.reshape(X, (1, len(X))), W)                   # Determine layer exit
+        Y = np.dot(X, W)                   # Determine layer exit
         
         if (self.sanger):
             Z = np.dot(W, np.transpose(Y*diag))                     # Predict X using Sanger
@@ -38,7 +38,7 @@ class Model():
         ans = []                                                    # Array of final layer outputs
         for i in range(0, len(X)):
             dW = []                                                 # Array of weight corrections
-            ans_i = [X[i]]                                          # Array of answers
+            ans_i = [np.reshape(X[i], (1, len(X[i])))]              # Array of answers, first element has shape (n,), so must be reshaped
             for j in range(0, self.layers - 1):
                 y_j, dw_j = self.activate(ans_i[j], self.W[j])      # Determine weight corrections for each layer
                 ans_i.append(y_j)                                   # Append current layer answer
