@@ -1,13 +1,26 @@
-from operator import mod
-from statistics import mode
+# =========================================== INCLUDES ===========================================
 from Model import Model
 import numpy as np
+from matplotlib import pyplot as plt
+import FileFuncions as ff
 
 data = np.genfromtxt("data/tp2_training_dataset.csv", delimiter=",", dtype=float)[:, :]
+plot_name_template = "results/results_#exp_name#_plot_#run_number#.png"
+exp_name = "tp2"
 
 norm = np.linalg.norm(data)
 data = data/norm
 
-S = [851, 15, 9]
-model = Model(S, maxIter=1000, sanger=False)
-iters, o = model.train(data)
+S = [851, 10, 6, 9]
+model = Model(S, maxIter=500, sanger=True, learningRate=0.01)
+iters, o, learning = model.train(data)
+exp_info = [model.S, model.learningRate, model.sanger, iters, model.maxIter, o]
+run_number = ff.store(exp_name, exp_info)
+
+plot_name = plot_name_template.replace("#exp_name#", exp_name)
+plot_name = plot_name.replace("#run_number#", run_number)
+plt.plot(learning)
+plt.title("Error evolution")
+plt.ylabel("Orthogonal Weights")
+plt.xlabel("Iteration")
+plt.savefig(plot_name)

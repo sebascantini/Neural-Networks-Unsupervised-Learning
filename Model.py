@@ -26,7 +26,7 @@ class Model():
         
         if (self.sanger):
             Z = np.dot(W, np.transpose(Y*diag))                     # Predict X using Sanger
-            dW = (np.reshape(X, (len(X), 1)) - Z) * Y               # Weight corrections using Sanger
+            dW = (np.transpose(X) - Z) * Y               # Weight corrections using Sanger
         else:
             Z = np.dot(Y, W.transpose())                            # Predict X using Oja
             dW = np.outer(X - Z, Y)                                 # Weight corrections using Oja
@@ -51,14 +51,16 @@ class Model():
         return ans
     
     def train(self, X):
+        learning = []
         o = self.orthogonalWeights()
         iters = 0
         while(o > 0.1 and iters < self.maxIter):
             self.learn(X)
             o = self.orthogonalWeights()
             iters += 1
+            learning.append(o)
             print(iters, o)
-        return iters, o
+        return iters, o, learning
 
 
     # ===============================AUXILIARY===============================
@@ -76,10 +78,12 @@ class Model():
             w.append(layerW)
         return w
     
+    # Apply weight corrections given array of weight correction matrices
     def adaptation(self, dW):
         for k in range(0, self.layers - 1):
             self.W[k] = self.W[k] + dW[k]*self.learningRate
     
+    # Last layer orthogonal weights
     def orthogonalWeights(self):
         o = np.sum(np.abs(np.dot(self.W[len(self.W) - 1].transpose(), self.W[len(self.W) - 1]) - np.identity(self.W[len(self.W) - 1].shape[1])))/2
         return o
